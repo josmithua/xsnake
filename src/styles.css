@@ -1,0 +1,69 @@
+.App {
+  font-family: monospace;
+  font-size: 1.3rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid {
+  border-style: solid;
+  border-width: 4px;
+  border-color: black;
+}
+
+.row {
+  display: flex;
+  flex-direction: row;
+}
+
+.cell {
+  position: relative;
+  width: 1em;
+  height: 1em;
+}
+
+.apple {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.snake {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.head,
+.body {
+  display: inline-block;
+}
+.head::before {
+  content: "🧑‍🍳";
+}
+.body::before {
+  content: "🥧";
+}
+.apple::before {
+  content: "🍎";
+}
+
+.head[data-dir="Right"],
+.body[data-dir="Right"] {
+  transform: rotate(-90deg);
+}
+.head[data-dir="Left"],
+.body[data-dir="Left"] {
+  transform: rotate(90deg);
+}
+.head[data-dir="Up"],
+.body[data-dir="Up"] {
+  transform: rotate(180deg);
+}
