@@ -25,7 +25,7 @@ function isOutsideGrid(gridSize: Point, p: Point) {
   return p.x < 0 || p.x >= gridSize.x || p.y < 0 || p.y >= gridSize.y;
 }
 
-function contains<T extends Point>(points: T[], p: Point) {
+function find<T extends Point>(points: T[], p: Point) {
   return points.find((pp) => isSamePos(pp, p));
 }
 
@@ -63,7 +63,7 @@ function randomGridPoint(gridSize: Point): Point {
 
 function newApple(gridSize: Point, ineligibleGridPoints: Point[]) {
   let newApple = randomGridPoint(gridSize);
-  while (contains(ineligibleGridPoints, newApple)) {
+  while (find(ineligibleGridPoints, newApple)) {
     newApple = randomGridPoint(gridSize);
   }
   return newApple;
@@ -101,14 +101,12 @@ function createInitialContext(): SnakeMachineContext {
   };
 }
 
-const initialContext = createInitialContext();
-
-function App() {
-  const [current, send] = useMachine(snakeMachine, {
-    context: initialContext,
+const configuredSnakeMachine = snakeMachine
+  .withContext(createInitialContext)
+  .withConfig({
     guards: {
       "ate apple": (c) => isSamePos(head(c.snake), c.apple),
-      "hit tail": (c) => !!contains(body(c.snake), head(c.snake)),
+      "hit tail": (c) => !!find(body(c.snake), head(c.snake)),
       "hit wall": (c) => isOutsideGrid(c.gridSize, head(c.snake))
     },
     actions: {
@@ -116,7 +114,7 @@ function App() {
       "save dir": assign({
         dir: (c, e) => (e.dir !== oppositeDir[c.dir] ? e.dir : c.dir)
       }),
-      "increment score": assign({
+      "increase score": assign({
         score: (c) => c.score + 1,
         highScore: (c) => Math.max(c.score + 1, c.highScore)
       }),
@@ -128,7 +126,11 @@ function App() {
       }))
     }
   });
-  const { gridSize, snake, dir, apple, score, highScore } = current.context;
+
+function App() {
+  const [current, send] = useMachine(configuredSnakeMachine);
+  const { gridSize, snake, apple, score, highScore } = current.context;
+  const isGameOver = current.matches("Game Over");
 
   React.useEffect(() => {
     function keyListener(event) {
@@ -146,28 +148,35 @@ function App() {
 
   return (
     <div className="App">
-      <h3>
+      <header>
+        <h1 style={{ marginBottom: 0 }}>XSnake</h1>
+        <p style={{ margin: 0 }}>Snake with a sweet twist, built with XState</p>
+      </header>
+      <p style={{ fontSize: "1.2em", marginBottom: 0 }}>
+        {isGameOver ? "Game Over!" : "\u00A0"}
+      </p>
+      <p>
         Score: {score}
-        <br /> High score: {highScore}
-      </h3>
-      <h5>Arrow keys to move, "r" for new game</h5>
+        <br />
+        High score: {highScore}
+      </p>
       <div className="grid">
         {Array.from({ length: gridSize.y }).map((_, y) => (
           <div className="row" key={y}>
             {Array.from({ length: gridSize.x }).map((_, x) => {
               const cell = { x, y };
-              let cn: "head" | "apple" | "body", _dir: Dir | undefined;
+              let cn: "head" | "apple" | "body", dir: Dir | undefined;
               if (isSamePos(head(snake), cell)) {
                 cn = "head";
-                _dir = dir;
+                dir = head(snake).dir;
               } else if (isSamePos(apple, cell)) {
                 cn = "apple";
-                _dir = undefined;
+                dir = undefined;
               } else {
-                const maybeBodyPart = contains(snake, cell);
+                const maybeBodyPart = find(snake, cell);
                 if (maybeBodyPart) {
                   cn = "body";
-                  _dir = maybeBodyPart.dir;
+                  dir = maybeBodyPart.dir;
                 }
               }
 
@@ -177,7 +186,7 @@ function App() {
                     role="img"
                     aria-label={cn}
                     className={cn}
-                    data-dir={_dir}
+                    data-dir={dir}
                   />
                 </div>
               );
@@ -185,8 +194,12 @@ function App() {
           </div>
         ))}
       </div>
+      <p style={{ fontSize: "0.7em" }}>
+        Press arrow keys to move, "r" for new game.
+      </p>
     </div>
   );
 }
+
 const rootElement = document.getElementById("root");
 ReactDOM.render(<App />, rootElement);

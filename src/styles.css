@@ -9,8 +9,9 @@
 }
 
 .grid {
+  position: relative;
   border-style: solid;
-  border-width: 4px;
+  border-width: 2px;
   border-color: black;
 }
 
@@ -20,37 +21,23 @@
 }
 
 .cell {
-  position: relative;
   width: 1em;
   height: 1em;
-}
-
-.apple {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.snake {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
 }
 
 .head,
 .body {
   display: inline-block;
 }
+
 .head::before {
   content: "🧑‍🍳";
 }
+
 .body::before {
   content: "🥧";
 }
+
 .apple::before {
   content: "🍎";
 }

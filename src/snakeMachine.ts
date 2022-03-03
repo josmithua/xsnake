@@ -1,5 +1,4 @@
 import { createMachine } from "xstate";
-import { log } from "xstate/lib/actions";
 
 type Dir = "Up" | "Left" | "Down" | "Right";
 type Point = { x: number; y: number };
@@ -15,54 +14,52 @@ export type SnakeMachineContext = {
   highScore: number;
 };
 
-export const snakeMachine = createMachine({
+export const snakeMachine = createMachine<SnakeMachineContext>({
   id: "SnakeMachine",
-  schema: {
-    context: {} as SnakeMachineContext,
-    events: {} as { type: "ARROW_KEY"; dir: Dir }
-  },
-  initial: "Stationary",
+  initial: "New Game",
   states: {
-    Stationary: {
+    "New Game": {
       on: {
         ARROW_KEY: {
-          target: "#SnakeMachine.Moving",
-          actions: "save dir"
+          actions: "save dir",
+          target: "#SnakeMachine.Moving"
         }
       }
     },
     Moving: {
-      entry: ["move snake", log("hi")],
+      entry: "move snake",
       after: {
-        "7500": {
+        "80": {
           target: "#SnakeMachine.Moving"
         }
       },
       always: [
         {
           cond: "ate apple",
-          actions: ["increment score", "grow snake", "show new apple"]
-        },
-        {
-          cond: "hit tail",
-          target: "#SnakeMachine.Game Over"
+          actions: ["grow snake", "increase score", "show new apple"]
         },
         {
           cond: "hit wall",
+          target: "#SnakeMachine.Game Over"
+        },
+        {
+          cond: "hit tail",
           target: "#SnakeMachine.Game Over"
         }
       ],
       on: {
         ARROW_KEY: {
-          actions: "save dir"
+          actions: "save dir",
+          target: "#SnakeMachine.Moving"
         }
       }
     },
     "Game Over": {
       on: {
         NEW_GAME: {
-          target: "#SnakeMachine.Stationary",
-          actions: "reset"
+          actions: "reset",
+          description: 'triggered by pressing the "r" key',
+          target: "#SnakeMachine.New Game"
         }
       }
     }
