@@ -1,5 +1,5 @@
 {
-  "name": "xstate-react-typescript-template",
+  "name": "xsnake",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
@@ -8,7 +8,7 @@
     "@xstate/react": "2.0.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
-    "react-scripts": "4.0.3",
+    "react-scripts": "5.0.0",
     "xstate": "4.30.3"
   },
   "devDependencies": {
@@ -22,10 +22,5 @@
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ]
+  "browserslist": [">0.2%", "not dead", "not ie <= 11", "not op_mini all"]
 }
