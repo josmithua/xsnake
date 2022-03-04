@@ -1,20 +1,20 @@
-import "./styles.css";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-import { assign } from "xstate";
-import { useMachine } from "@xstate/react";
-import { snakeMachine, SnakeMachineContext } from "./snakeMachine";
+import './styles.css';
+import * as React from 'react';
+import * as ReactDOM from 'react-dom';
+import { assign } from 'xstate';
+import { useMachine } from '@xstate/react';
+import { snakeMachine, SnakeMachineContext } from './snakeMachine';
 
-type Dir = SnakeMachineContext["dir"];
-type Point = SnakeMachineContext["gridSize"];
-type BodyPart = SnakeMachineContext["snake"][0];
-type Snake = SnakeMachineContext["snake"];
+type Dir = SnakeMachineContext['dir'];
+type Point = SnakeMachineContext['gridSize'];
+type BodyPart = SnakeMachineContext['snake'][0];
+type Snake = SnakeMachineContext['snake'];
 
 const oppositeDir: Record<Dir, Dir> = {
-  Up: "Down",
-  Down: "Up",
-  Left: "Right",
-  Right: "Left"
+  Up: 'Down',
+  Down: 'Up',
+  Left: 'Right',
+  Right: 'Left',
 };
 
 function isSamePos(p1: Point, p2: Point) {
@@ -39,13 +39,13 @@ function body(snake: Snake) {
 
 function newHead(oldHead: BodyPart, dir: Dir): BodyPart {
   switch (dir) {
-    case "Up":
+    case 'Up':
       return { x: oldHead.x, y: oldHead.y - 1, dir };
-    case "Down":
+    case 'Down':
       return { x: oldHead.x, y: oldHead.y + 1, dir };
-    case "Left":
+    case 'Left':
       return { x: oldHead.x - 1, y: oldHead.y, dir };
-    case "Right":
+    case 'Right':
       return { x: oldHead.x + 1, y: oldHead.y, dir };
   }
 }
@@ -57,7 +57,7 @@ function moveSnake(snake: Snake, dir: Dir): Snake {
 function randomGridPoint(gridSize: Point): Point {
   return {
     x: Math.floor(Math.random() * gridSize.x),
-    y: Math.floor(Math.random() * gridSize.y)
+    y: Math.floor(Math.random() * gridSize.y),
   };
 }
 
@@ -77,7 +77,7 @@ function makeInitialSnake(gridSize: Point): Snake {
   const head: BodyPart = {
     x: Math.floor(gridSize.x / 2),
     y: Math.floor(gridSize.y / 2),
-    dir: "Right"
+    dir: 'Right',
   };
   return [head, { ...head, x: head.x - 1 }, { ...head, x: head.x - 2 }];
 }
@@ -85,7 +85,7 @@ function makeInitialSnake(gridSize: Point): Snake {
 function makeInitialApple(gridSize: Point): Point {
   return {
     x: Math.floor((gridSize.x * 3) / 4),
-    y: Math.floor(gridSize.y / 2)
+    y: Math.floor(gridSize.y / 2),
   };
 }
 
@@ -97,7 +97,7 @@ function createInitialContext(): SnakeMachineContext {
     apple: makeInitialApple(gridSize),
     score: 0,
     highScore: 0,
-    dir: "Right"
+    dir: 'Right',
   };
 }
 
@@ -105,45 +105,45 @@ const configuredSnakeMachine = snakeMachine
   .withContext(createInitialContext)
   .withConfig({
     guards: {
-      "ate apple": (c) => isSamePos(head(c.snake), c.apple),
-      "hit tail": (c) => !!find(body(c.snake), head(c.snake)),
-      "hit wall": (c) => isOutsideGrid(c.gridSize, head(c.snake))
+      'ate apple': (c) => isSamePos(head(c.snake), c.apple),
+      'hit tail': (c) => !!find(body(c.snake), head(c.snake)),
+      'hit wall': (c) => isOutsideGrid(c.gridSize, head(c.snake)),
     },
     actions: {
-      "move snake": assign({ snake: (c) => moveSnake(c.snake, c.dir) }),
-      "save dir": assign({
-        dir: (c, e) => (e.dir !== oppositeDir[c.dir] ? e.dir : c.dir)
+      'move snake': assign({ snake: (c) => moveSnake(c.snake, c.dir) }),
+      'save dir': assign({
+        dir: (c, e) => (e.dir !== oppositeDir[c.dir] ? e.dir : c.dir),
       }),
-      "increase score": assign({
+      'increase score': assign({
         score: (c) => c.score + 1,
-        highScore: (c) => Math.max(c.score + 1, c.highScore)
+        highScore: (c) => Math.max(c.score + 1, c.highScore),
       }),
-      "show new apple": assign({ apple: (c) => newApple(c.gridSize, c.snake) }),
-      "grow snake": assign({ snake: (c) => growSnake(c.snake) }),
+      'show new apple': assign({ apple: (c) => newApple(c.gridSize, c.snake) }),
+      'grow snake': assign({ snake: (c) => growSnake(c.snake) }),
       reset: assign((c) => ({
         ...createInitialContext(),
-        highScore: c.highScore
-      }))
-    }
+        highScore: c.highScore,
+      })),
+    },
   });
 
 function App() {
   const [current, send] = useMachine(configuredSnakeMachine);
-  const { gridSize, snake, apple, score, highScore } = current.context;
-  const isGameOver = current.matches("Game Over");
+  const { gridSize, score, highScore } = current.context;
+  const isGameOver = current.matches('Game Over');
 
   React.useEffect(() => {
-    function keyListener(event) {
-      const [maybeKey, maybeDir] = event.key.split("Arrow");
+    function keyListener(event: KeyboardEvent) {
+      const [maybeKey, maybeDir] = event.key.split('Arrow');
       if (maybeDir) {
-        send({ type: "ARROW_KEY", dir: maybeDir });
-      } else if (maybeKey === "r") {
-        send({ type: "NEW_GAME" });
+        send({ type: 'ARROW_KEY', dir: maybeDir as Dir });
+      } else if (maybeKey === 'r') {
+        send({ type: 'NEW_GAME' });
       }
     }
 
-    window.addEventListener("keydown", keyListener);
-    return () => window.removeEventListener("keydown", keyListener);
+    window.addEventListener('keydown', keyListener);
+    return () => window.removeEventListener('keydown', keyListener);
   }, [send]);
 
   return (
@@ -152,8 +152,8 @@ function App() {
         <h1 style={{ marginBottom: 0 }}>XSnake</h1>
         <p style={{ margin: 0 }}>Snake with a sweet twist, built with XState</p>
       </header>
-      <p style={{ fontSize: "1.2em", marginBottom: 0 }}>
-        {isGameOver ? "Game Over!" : "\u00A0"}
+      <p style={{ fontSize: '1.2em', marginBottom: 0 }}>
+        {isGameOver ? 'Game Over!' : '\u00A0'}
       </p>
       <p>
         Score: {score}
@@ -161,31 +161,18 @@ function App() {
         High score: {highScore}
       </p>
       <div className="grid">
-        {Array.from({ length: gridSize.y }).map((_, y) => (
-          <div className="row" key={y}>
-            {Array.from({ length: gridSize.x }).map((_, x) => {
-              const cell = { x, y };
-              let cn: "head" | "apple" | "body", dir: Dir | undefined;
-              if (isSamePos(head(snake), cell)) {
-                cn = "head";
-                dir = head(snake).dir;
-              } else if (isSamePos(apple, cell)) {
-                cn = "apple";
-                dir = undefined;
-              } else {
-                const maybeBodyPart = find(snake, cell);
-                if (maybeBodyPart) {
-                  cn = "body";
-                  dir = maybeBodyPart.dir;
-                }
-              }
-
+        {Array.from({ length: gridSize.y }).map((_, row) => (
+          <div className="row" key={row}>
+            {Array.from({ length: gridSize.x }).map((_, col) => {
+              const cell = { x: col, y: row };
+              const { type, dir } =
+                getGamObjectAtPos(current.context, cell) || {};
               return (
-                <div className="cell" key={x}>
+                <div className="cell" key={col}>
                   <span
                     role="img"
-                    aria-label={cn}
-                    className={cn}
+                    aria-label={type}
+                    className={type}
                     data-dir={dir}
                   />
                 </div>
@@ -194,12 +181,32 @@ function App() {
           </div>
         ))}
       </div>
-      <p style={{ fontSize: "0.7em" }}>
+      <p style={{ fontSize: '0.7em' }}>
         Press arrow keys to move, "r" for new game.
       </p>
     </div>
   );
 }
 
-const rootElement = document.getElementById("root");
+type GameObject =
+  | { type: 'head'; dir: Dir }
+  | { type: 'body'; dir: Dir }
+  | { type: 'apple'; dir: undefined };
+function getGamObjectAtPos(
+  context: SnakeMachineContext,
+  p: Point
+): GameObject | undefined {
+  let maybeBodyPart: BodyPart | undefined;
+  if (isSamePos(head(context.snake), p)) {
+    return { type: 'head', dir: context.dir };
+  } else if (isSamePos(context.apple, p)) {
+    return { type: 'apple', dir: undefined };
+  } else if ((maybeBodyPart = find(body(context.snake), p))) {
+    return { type: 'body', dir: maybeBodyPart.dir };
+  } else {
+    return undefined;
+  }
+}
+
+const rootElement = document.getElementById('root');
 ReactDOM.render(<App />, rootElement);
