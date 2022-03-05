@@ -160,26 +160,29 @@ function App() {
         <br />
         High score: {highScore}
       </p>
-      <div className="grid">
-        {Array.from({ length: gridSize.y }).map((_, row) => (
-          <div className="row" key={row}>
-            {Array.from({ length: gridSize.x }).map((_, col) => {
-              const cell = { x: col, y: row };
-              const { type, dir } =
-                getGamObjectAtPos(current.context, cell) || {};
-              return (
-                <div className="cell" key={col}>
-                  <span
-                    role="img"
-                    aria-label={type}
-                    className={type}
-                    data-dir={dir}
-                  />
-                </div>
-              );
-            })}
-          </div>
-        ))}
+      <div
+        className="grid"
+        style={{
+          gridTemplateColumns: `repeat(${gridSize.x}, 1fr)`,
+          gridTemplateRows: `repeat(${gridSize.y}, 1fr)`,
+        }}
+      >
+        {Array.from({ length: gridSize.y }).map((_, row) =>
+          Array.from({ length: gridSize.x }).map((_, col) => {
+            const { type, dir } =
+              getGamObjectAtPos(current.context, { x: col, y: row }) || {};
+            return (
+              <div className="cell" key={`${col} ${row}`}>
+                <span
+                  role="img"
+                  aria-label={type}
+                  className={type}
+                  data-dir={dir}
+                />
+              </div>
+            );
+          })
+        )}
       </div>
       <p style={{ fontSize: '0.7em' }}>
         Press arrow keys to move, "r" for new game.
